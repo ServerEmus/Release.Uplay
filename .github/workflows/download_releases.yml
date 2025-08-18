@@ -1,0 +1,48 @@
+name: Download Releases
+
+on:
+    schedule:
+    - cron:  '0 15 * * *'
+    workflow_dispatch:
+# allow manual trigger
+
+jobs:
+  download-releases:
+    runs-on: ubuntu-latest
+    permissions:
+        contents: write
+        pull-requests: write
+    strategy:
+        max-parallel: 1
+        fail-fast: false
+        matrix:
+            prj: [
+                "dbdata",
+                "upc_r1",
+                "upc_r2"
+            ]
+    steps:
+        - name: "Checkout branch"
+          uses: actions/checkout@v4
+
+        - uses: robinraju/release-downloader@v1
+          with:
+            repository: 'ServerEmus/Uplay.${{ matrix.prj }}'
+            latest: true
+            fileName: "*"
+            token: ${{ secrets.GH_TOKEN }}
+
+        - name: Commit files
+          run: |
+                git config --local user.email "github-actions[bot]@users.noreply.github.com"
+                git config --local user.name "github-actions[bot]"
+                git pull
+                git add .
+                
+                if git diff --cached --quiet; then
+                    echo "No changes to commit"
+                else
+                    git commit -a -m "Add new release"
+                    git push origin ${{ github.head_ref }}
+                fi
+        
