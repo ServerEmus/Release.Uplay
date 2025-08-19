@@ -16,11 +16,7 @@ jobs:
         max-parallel: 1
         fail-fast: false
         matrix:
-            prj: [
-                "dbdata",
-                "upc_r1",
-                "upc_r2"
-            ]
+            prj: [ "dbdata", "upc_r1", "upc_r2" ]
     steps:
         - name: "Checkout branch"
           uses: actions/checkout@v4
@@ -29,7 +25,7 @@ jobs:
           with:
             repository: 'ServerEmus/Uplay.${{ matrix.prj }}'
             latest: true
-            fileName: "*"
+            fileName: "*.dll"
             token: ${{ secrets.GH_TOKEN }}
 
         - name: Commit files
@@ -45,4 +41,5 @@ jobs:
                     git commit -a -m "Add new release"
                     git push origin ${{ github.head_ref }}
                 fi
+
         
